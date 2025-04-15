@@ -279,6 +279,23 @@
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-header">
+                                <i class="bi bi-trash"></i> 删除传感器
+                            </div>
+                            <div class="card-body">
+                                <form id="delete-form">
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" id="delete-id" placeholder="要删除的传感器ID" required>
+                                        <button class="btn btn-danger" type="submit">删除</button>
+                                    </div>
+                                </form>
+                                <div id="delete-result"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="card">
+                            <div class="card-header">
                                 <i class="bi bi-lightning"></i> 自动替换失效传感器
                             </div>
                             <div class="card-body">
@@ -298,24 +315,6 @@
                                         <img id="graph-sub-img" src="/send_replace_img" alt="替换图像" class="img-fluid rounded">
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <i class="bi bi-trash"></i> 删除传感器
-                            </div>
-                            <div class="card-body">
-                                <form id="delete-form">
-                                    <div class="input-group mb-3">
-                                        <input type="text" class="form-control" id="delete-id" placeholder="要删除的传感器ID" required>
-                                        <button class="btn btn-danger" type="submit">删除</button>
-                                    </div>
-                                </form>
-                                <div id="delete-result"></div>
                             </div>
                         </div>
                     </div>
