@@ -78,6 +78,20 @@ def get_replace_graph():
 def send_replace_img():
     return send_file("graph_sub.png", mimetype="image/png")
 
+@app.route('/activate_sensor/<sensor_id>', methods=['POST'])
+def activate_sensor(sensor_id):
+    try:
+        success = ocean_service.activate_sensor(sensor_id)
+        if success:
+            return jsonify({
+                'success': success,
+                'message': f"Sensor {sensor_id} 成功激活！"
+            })
+        else:
+            return jsonify({"status": "error", "message": "Sensor not found"}), 404
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route("/delete_sensor/<sensor_id>", methods=['DELETE'])
 def delete_sensor(sensor_id):
     try:

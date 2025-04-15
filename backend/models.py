@@ -287,6 +287,33 @@ class OceanMonitoringModel:
         except Exception as e:
             return False, f"替换过程中发生错误: {str(e)}"
     
+    def activate_sensor(self, sensor_id: str) -> bool:
+        """
+        激活指定ID的传感器，将其状态设为 active
+        """
+        try:
+            # 查询传感器节点是否存在
+            check_query = """
+            MATCH (s:Sensor {id: $sensor_id})
+            RETURN s
+            """
+            result = self.graph.run(check_query, sensor_id=sensor_id).data()
+            if not result:
+                print(f"未找到传感器 {sensor_id}")
+                return False
+
+            # 更新状态为 active
+            activate_query = """
+            MATCH (s:Sensor {id: $sensor_id})
+            SET s.status = "active"
+            """
+            self.graph.run(activate_query, sensor_id=sensor_id)
+            return True
+
+        except Exception as e:
+            print(f"激活传感器{sensor_id}时出错: {str(e)}")
+            return False
+
     def delete_sensor_and_relations(self, sensor_id: str) -> bool:
         """
         删除指定ID的传感器节点及其所有关系
@@ -427,7 +454,7 @@ class OceanMonitoringModel:
         buf = io.BytesIO()
         plt.savefig(buf, format='png', bbox_inches='tight', facecolor='#f3f5f7')
         buf.seek(0)
-        
+
         save_path = os.path.join(os.getcwd(), 'graph_sub.png')
         plt.savefig(save_path, bbox_inches='tight', facecolor='#f3f5f7')
         print(f"[调试] 图像已保存到: {save_path}")

@@ -45,6 +45,10 @@ class OceanMonitoringService:
         """获取可替代传感器列表"""
         return self.model.get_substitutes(sensor_id)
     
+    def activate_sensor(self, sensor_id: str):
+        """激活传感器"""
+        return self.model.activate_sensor(sensor_id)
+    
     def delete_sensor_and_relations(self, sensor_id: str) -> bool:
         """删除传感器"""
         return self.model.delete_sensor_and_relations(sensor_id)
