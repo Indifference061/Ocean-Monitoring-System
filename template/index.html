@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>海洋监测系统 | Ocean Monitoring Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #1a6fc9;
+            --secondary-color: #0d8bf2;
+            --accent-color: #00c9a7;
+            --dark-color: #2c3e50;
+            --light-color: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn-accent {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-accent:hover {
+            background-color: #00b89c;
+            border-color: #00b89c;
+        }
+        
+        .value-pair {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .value-pair .key {
+            flex: 2;
+        }
+        
+        .value-pair .value {
+            flex: 3;
+        }
+        
+        .remove-field {
+            color: #dc3545;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+        
+        .graph-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+        
+        .sensor-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .sensor-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+        
+        .sensor-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        
+        .status-active {
+            background-color: #28a74520;
+            color: #28a745;
+        }
+        
+        .status-inactive {
+            background-color: #dc354520;
+            color: #dc3545;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 600;
+            border-bottom: 3px solid var(--primary-color);
+        }
+        
+        .nav-tabs .nav-link {
+            color: #6c757d;
+            border: none;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="dashboard-header text-center">
+        <div class="container">
+            <h1><i class="bi bi-water"></i> 海洋监测系统</h1>
+            <p class="lead">实时监控海洋传感器网络状态</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-plus-circle"></i> 添加传感器</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="sensor-form">
+                            <div class="mb-3">
+                                <label for="id" class="form-label">传感器ID</label>
+                                <input type="text" class="form-control" id="id" name="id" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="type" class="form-label">传感器类型</label>
+                                <input type="text" class="form-control" id="type" name="type" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="location" class="form-label">位置坐标</label>
+                                <input type="text" class="form-control" id="location" name="location" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">测量值</label>
+                                <div id="measured-values">
+                                    <div class="value-pair">
+                                        <input type="text" class="form-control key" placeholder="参数名">
+                                        <input type="text" class="form-control value" placeholder="数值">
+                                        <button type="button" class="remove-field btn btn-sm btn-outline-danger"><i class="bi bi-x"></i></button>
+                                    </div>
+                                </div>
+                                <button type="button" id="add-field" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-plus"></i> 添加参数</button>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-save"></i> 保存传感器</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-link-45deg"></i> 节点连接
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs mb-3" id="connectionTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="sensor-edge-tab" data-bs-toggle="tab" data-bs-target="#sensor-edge" type="button" role="tab">传感器-边缘</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="edge-cloud-tab" data-bs-toggle="tab" data-bs-target="#edge-cloud" type="button" role="tab">边缘-云端</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="connectionTabContent">
+                            <div class="tab-pane fade show active" id="sensor-edge" role="tabpanel">
+                                <form id="link-sensor-form">
+                                    <div class="mb-3">
+                                        <label for="sensor-id" class="form-label">传感器ID</label>
+                                        <input type="text" class="form-control" id="sensor-id" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="edge-id" class="form-label">边缘节点ID</label>
+                                        <input type="text" class="form-control" id="edge-id" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-accent w-100"><i class="bi bi-plug"></i> 建立连接</button>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="edge-cloud" role="tabpanel">
+                                <form id="link-edge-form">
+                                    <div class="mb-3">
+                                        <label for="edge-id-cloud" class="form-label">边缘节点ID</label>
+                                        <input type="text" class="form-control" id="edge-id-cloud" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="cloud-id" class="form-label">云资源ID</label>
+                                        <input type="text" class="form-control" id="cloud-id" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-accent w-100"><i class="bi bi-cloud-arrow-up"></i> 连接云端</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-diagram-3"></i> 网络拓扑图</span>
+                        <button onclick="loadImage()" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i> 刷新</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="graph-container">
+                            <img id="graph-img" src="/graph_image" alt="网络拓扑图" class="img-fluid rounded">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-search"></i> 替代传感器查询
+                            </div>
+                            <div class="card-body">
+                                <form id="substitute-form">
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" id="inactive-id" placeholder="失效传感器ID" required>
+                                        <button class="btn btn-primary" type="submit">查询</button>
+                                    </div>
+                                </form>
+                                <div class="sensor-list">
+                                    <ul id="substitute-list" class="list-group"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-lightning"></i> 自动替换失效传感器
+                            </div>
+                            <div class="card-body">
+                                <form id="auto-replace-form" action="#show-graph">
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" id="auto-replace-id" placeholder="失效传感器ID" required>
+                                        <button class="btn btn-danger" type="submit">自动替换</button>
+                                    </div>
+                                    <div id="replace-log" class="text-muted small" style="white-space: pre-line;"></div>
+
+                                </form>
+                                <!-- <button onclick="loadSubImage()" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i> 刷新</button> -->
+                                <!-- 默认隐藏的图像容器 -->
+                                <div id="sub_graph-container" >
+                                    <h5>传感器替换过程图</h5>
+                                    <div class="graph-container">
+                                        <img id="graph-sub-img" src="/send_replace_img" alt="替换图像" class="img-fluid rounded">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-trash"></i> 删除传感器
+                            </div>
+                            <div class="card-body">
+                                <form id="delete-form">
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" id="delete-id" placeholder="要删除的传感器ID" required>
+                                        <button class="btn btn-danger" type="submit">删除</button>
+                                    </div>
+                                </form>
+                                <div id="delete-result"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-collection"></i> 传感器列表
+                    </div>
+                    <div class="card-body">
+                        <div class="sensor-list">
+                            <ul id="sensor-list" class="list-group"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 加载传感器列表
+            function loadSensors() {
+                $.get("/get_nodes", function(data) {
+                    $('#sensor-list').empty();
+                    if (data.length === 0) {
+                        $('#sensor-list').append('<li class="list-group-item text-muted">暂无传感器数据</li>');
+                    } else {
+                        data.forEach(node => {
+                            let label = node.labels[0];
+                            let props = Object.entries(node.properties)
+                                .map(([key, val]) => `<span class="text-muted">${key}:</span> <strong>${val}</strong>`)
+                                .join(", ");
+                            
+                            let statusClass = node.properties.status === 'active' ? 'status-active' : 'status-inactive';
+                            
+                            $('#sensor-list').append(`
+                                <li class="list-group-item sensor-item">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <span class="badge ${statusClass} status-badge">${node.properties.status}</span>
+                                            <span class="fw-bold">${label} ${node.properties.id}</span>
+                                        </div>
+                                        <small class="text-muted">${node.properties.type}</small>
+                                    </div>
+                                    <div class="mt-2 text-sm">${props}</div>
+                                </li>
+                            `);
+                        });
+                    }
+                });
+            }
+
+            loadSensors();
+
+            // 添加新的键值对字段
+            $('#add-field').click(function() {
+                $('#measured-values').append(`
+                    <div class="value-pair">
+                        <input type="text" class="form-control key" placeholder="参数名">
+                        <input type="text" class="form-control value" placeholder="数值">
+                        <button type="button" class="remove-field btn btn-sm btn-outline-danger"><i class="bi bi-x"></i></button>
+                    </div>
+                `);
+            });
+
+            // 删除键值对字段
+            $(document).on('click', '.remove-field', function() {
+                $(this).parent('.value-pair').remove();
+            });
+
+            // 提交传感器信息
+            $('#sensor-form').submit(function(event) {
+                event.preventDefault();
+                showLoading(this);
+
+                let measuredValues = {};
+                $('.value-pair').each(function() {
+                    let key = $(this).find('.key').val();
+                    let value = $(this).find('.value').val();
+                    if (key && value) {
+                        measuredValues[key] = isNaN(value) ? value : parseFloat(value);
+                    }
+                });
+
+                const sensorData = {
+                    id: $('#id').val(),
+                    type: $('#type').val(),
+                    location: $('#location').val(),
+                    values: measuredValues
+                };
+
+                $.ajax({
+                    url: '/add_sensor',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(sensorData),
+                    success: function(response) {
+                        showAlert('success', '传感器添加成功');
+                        $('#sensor-form')[0].reset();
+                        loadSensors();
+                        loadImage();
+                    },
+                    error: function(xhr) {
+                        showAlert('danger', xhr.responseJSON?.message || '添加失败');
+                    },
+                    complete: function() {
+                        hideLoading('#sensor-form');
+                    }
+                });
+            });
+
+            // 提交传感器与边缘节点连接
+            $('#link-sensor-form').submit(function(event) {
+                event.preventDefault();
+                showLoading(this);
+
+                const data = {
+                    sensor_id: $('#sensor-id').val(),
+                    edge_id: $('#edge-id').val()
+                };
+                
+                $.ajax({
+                    url: '/link_sensor_to_edge',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function(response) {
+                        showAlert('success', response.message);
+                        $('#link-sensor-form')[0].reset();
+                        loadImage();
+                    },
+                    error: function(xhr) {
+                        showAlert('danger', xhr.responseJSON?.message || '连接失败');
+                    },
+                    complete: function() {
+                        hideLoading('#link-sensor-form');
+                    }
+                });
+            });
+
+            // 提交边缘节点与云平台连接
+            $('#link-edge-form').submit(function(event) {
+                event.preventDefault();
+                showLoading(this);
+
+                const data = {
+                    edge_id: $('#edge-id-cloud').val(),
+                    cloud_id: $('#cloud-id').val()
+                };
+                
+                $.ajax({
+                    url: '/link_edge_to_cloud',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function(response) {
+                        showAlert('success', response.message);
+                        $('#link-edge-form')[0].reset();
+                        loadImage();
+                    },
+                    error: function(xhr) {
+                        showAlert('danger', xhr.responseJSON?.message || '连接失败');
+                    },
+                    complete: function() {
+                        hideLoading('#link-edge-form');
+                    }
+                });
+            });
+
+            // 替代查询表单提交
+            $('#substitute-form').submit(function(event) {
+                event.preventDefault();
+                showLoading(this);
+
+                const sensorId = $('#inactive-id').val();
+
+                $.get(`/get_substitutes/${sensorId}`, function(data) {
+                    $('#substitute-list').empty();
+                    if (data.length === 0) {
+                        $('#substitute-list').append('<li class="list-group-item text-muted">没有找到可替代的传感器</li>');
+                    } else {
+                        data.forEach(sensor => {
+                            let scoreHtml = sensor.score ? `<span class="badge bg-success float-end">评分: ${sensor.score}</span>` : '';
+                            $('#substitute-list').append(`
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="fw-bold">${sensor.id}</span>
+                                        <small class="text-muted d-block">${sensor.type} | ${sensor.location}</small>
+                                    </div>
+                                    ${scoreHtml}
+                                </li>
+                            `);
+                        });
+                    }
+                }).fail(function() {
+                    showAlert('danger', '查询失败');
+                }).always(function() {
+                    hideLoading('#substitute-form');
+                });
+            });
+            
+            // 自动替换表单提交
+            $('#auto-replace-form').submit(function(event) {
+                event.preventDefault();
+                showLoading(this);
+
+                const sensorId = $('#auto-replace-id').val();
+                $('#replace-log').text('正在进行替换...');
+
+                $.post(`/auto_replace/${sensorId}`, function(response) {
+                    if (response.success) {
+                        $('#replace-log').html(
+                            `<span class="text-success">${response.message}</span><br>` +
+                            `<span class="text-muted">替代传感器ID：${response.replacement_id}</span>`
+                        );
+                        const imageUrl = `/get_replace_graph?failed_id=${sensorId}&replacement_id=${response.replacement_id}`;
+                        $('#graph-sub-img').attr('src', imageUrl).show(); 
+                        loadSensors();
+                    } else {
+                        $('#replace-log').html(
+                            `<span class="text-danger">${response.message}</span>`
+                        );
+                    }
+                    
+                }).fail(function() {
+                    $('#replace-log').html('<span class="text-danger">请求失败，请检查网络或服务状态。</span>');
+                }).always(function() {
+                    hideLoading('#auto-replace-form');
+                });
+            });
+            // 删除传感器
+            $('#delete-form').submit(function(event) {
+                event.preventDefault();
+                showLoading(this);
+
+                const sensorId = $('#delete-id').val();
+
+                $.ajax({
+                    url: `/delete_sensor/${sensorId}`,
+                    type: 'DELETE',
+                    success: function(response) {
+                        showAlert('success', `传感器 ${sensorId} 已删除`);
+                        $('#delete-form')[0].reset();
+                        loadSensors();
+                        loadImage();
+                    },
+                    error: function(xhr) {
+                        showAlert('danger', xhr.responseJSON?.message || '删除失败');
+                    },
+                    complete: function() {
+                        hideLoading('#delete-form');
+                    }
+                });
+            });
+        });
+
+        function loadImage() {
+            $('#graph-img').attr('src', '/graph_image?ts=' + new Date().getTime());
+        }
+        function loadSubImage() {
+            $('#graph-sub-img').attr('src', '/send_replace_img?ts=' + new Date().getTime());
+        }
+        function showAlert(type, message) {
+            const alert = $(`
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `);
+            $('.container').prepend(alert);
+            setTimeout(() => alert.alert('close'), 5000);
+        }
+
+        function showLoading(form) {
+            $(form).find('button[type="submit"]').prop('disabled', true);
+            $(form).find('button[type="submit"]').html('<span class="spinner-border spinner-border-sm" role="status"></span> 处理中...');
+        }
+
+        function hideLoading(form) {
+            $(form).find('button[type="submit"]').prop('disabled', false);
+            $(form).find('button[type="submit"]').html(function() {
+                const icons = {
+                    '#sensor-form': 'bi-save',
+                    '#link-sensor-form': 'bi-plug',
+                    '#link-edge-form': 'bi-cloud-arrow-up',
+                    '#substitute-form': 'bi-search',
+                    '#delete-form': 'bi-trash'
+                };
+                return `<i class="bi ${icons[form]}"></i> ${$(this).text().replace('处理中...', '').trim()}`;
+            });
+        }
+    </script>
+</body>
+</html>
