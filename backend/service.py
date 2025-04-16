@@ -67,7 +67,6 @@ class OceanMonitoringService:
         if not substitutes:
             return False, f"未找到可替代传感器：{failed_sensor_id}", None
 
-        # 优先选择第一个状态为 active 的替代传感器
         for sub in substitutes:
             if sub['status'] == 'active':
                 success, message = self.model.apply_replacement(
