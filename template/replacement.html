@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>海洋监测系统 • 传感器替换</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <div class="dashboard-header text-center">
+    <div class="container">
+      <h1><i class="bi bi-arrow-repeat"></i> 传感器替换</h1>
+      <p class="lead">查询可替代 & 一键自动替换</p>
+      <a href="{{ url_for('index') }}" class="btn btn-outline-light btn-sm">← 返回导航</a>
+    </div>
+  </div>
+
+  <div class="container py-4">
+    <div class="row g-4">
+      <!-- 替代查询 -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header"><i class="bi bi-search"></i> 查询替代传感器</div>
+          <div class="card-body">
+            <form id="substitute-form">
+              <div class="input-group mb-3">
+                <input id="inactive-id" class="form-control" placeholder="失效传感器ID" required>
+                <button class="btn btn-primary" type="submit">查询</button>
+              </div>
+            </form>
+            <ul id="substitute-list" class="list-group"></ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自动替换 -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header"><i class="bi bi-lightning"></i> 自动替换失效传感器</div>
+          <div class="card-body">
+            <form id="auto-replace-form">
+              <div class="input-group mb-3">
+                <input id="auto-replace-id" class="form-control" placeholder="失效传感器ID" required>
+                <button class="btn btn-danger" type="submit">自动替换</button>
+              </div>
+            </form>
+            <div id="replace-log" class="text-muted small mb-3" style="white-space: pre-line;"></div>
+            <div class="graph-container">
+              <img id="graph-sub-img" src="/send_replace_img" class="img-fluid rounded" alt="替换过程图">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 脚本 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+</body>
+</html>

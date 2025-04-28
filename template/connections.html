@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>海洋监测系统 • 网络连接</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <div class="dashboard-header text-center">
+    <div class="container">
+      <h1><i class="bi bi-gear-wide-connected"></i> 网络连接</h1>
+      <p class="lead">传感器 ↔ 边缘 ↔ 云，及实时拓扑图</p>
+      <a href="{{ url_for('index') }}" class="btn btn-outline-light btn-sm">← 返回导航</a>
+    </div>
+  </div>
+
+  <div class="container py-4">
+    <div class="row g-4">
+      <!-- 传感器↔边缘 & 边缘↔云 -->
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header"><i class="bi bi-link-45deg"></i> 节点连接</div>
+          <div class="card-body">
+            <ul class="nav nav-tabs mb-3" id="connectionTabs" role="tablist">
+              <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#sensor-edge">传感器-边缘</button></li>
+              <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#edge-cloud">边缘-云端</button></li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane fade show active" id="sensor-edge">
+                <form id="link-sensor-form">
+                  <div class="mb-2"><input id="sensor-id" class="form-control" placeholder="传感器ID" required></div>
+                  <div class="mb-2"><input id="edge-id" class="form-control" placeholder="边缘节点ID" required></div>
+                  <button class="btn btn-accent w-100" type="submit"><i class="bi bi-plug"></i> 连接</button>
+                </form>
+              </div>
+              <div class="tab-pane fade" id="edge-cloud">
+                <form id="link-edge-form">
+                  <div class="mb-2"><input id="edge-id-cloud" class="form-control" placeholder="边缘节点ID" required></div>
+                  <div class="mb-2"><input id="cloud-id" class="form-control" placeholder="云资源ID" required></div>
+                  <button class="btn btn-accent w-100" type="submit"><i class="bi bi-cloud-arrow-up"></i> 连接</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 网络拓扑图 -->
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between">
+            <span><i class="bi bi-diagram-3"></i> 网络拓扑图</span>
+            <button class="btn btn-sm btn-outline-secondary" onclick="loadImage()">
+              <i class="bi bi-arrow-clockwise"></i> 刷新
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="graph-container">
+              <img id="graph-img" src="/graph_image" class="img-fluid rounded" alt="拓扑图">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 脚本 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+</body>
+</html>
