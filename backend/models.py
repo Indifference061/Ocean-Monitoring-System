@@ -110,7 +110,7 @@ class OceanMonitoringModel:
                                     sensor_type=sensor_type,
                                     new_sensor_id=sensor_id,
                                     location=location).data()
-            
+            print(f"找到 {len(candidates)} 个候选传感器进行评估")
             if not candidates:
                 print( "未找到可替换的候选传感器进行评估")
                 return sensor
@@ -138,7 +138,7 @@ class OceanMonitoringModel:
                     print(f"[错误] 评估 {candidate_id} 时出错: {str(e)}")
 
             # 使用线程池并发评估
-            with ThreadPoolExecutor(max_workers=5) as executor:
+            with ThreadPoolExecutor(max_workers=2) as executor:
                 futures = [executor.submit(evaluate_and_create, c["candidate_id"]) for c in candidates]
                 for future in as_completed(futures):
                     future.result()

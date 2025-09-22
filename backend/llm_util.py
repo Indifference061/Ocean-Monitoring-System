@@ -75,8 +75,8 @@ def ask_spark(query: str) -> str:
     appid = "2c6796f9"
     api_key = "03f06dd13ab3d8b75cc649fab89aa572"
     api_secret = "N2VmOTMzMzc3MmZlZWU0ZDA5ODk3NmI2"
-    spark_url = "wss://spark-api.xf-yun.com/v1.1/chat"
-    domain = "lite"
+    spark_url = "wss://spark-api.xf-yun.com/v3.5/chat"
+    domain = "generalv3.5"
 
     wsParam = Ws_Param(appid, api_key, api_secret, spark_url)
     url = wsParam.create_url()

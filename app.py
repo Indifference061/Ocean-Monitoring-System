@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify, render_template, send_file
 from backend.database import Neo4jDB
 from backend.service import OceanMonitoringService
 import io
+import time
 
 ocean_service = OceanMonitoringService()
 app = Flask(__name__, template_folder='template')
@@ -13,6 +14,7 @@ def index():
 
 @app.route('/add_sensor', methods=['POST'])
 def add_sensor():
+    start_time = time.time()
     data = request.json
     sensor_id = data["id"]
     sensor_type = data["type"]
@@ -20,6 +22,8 @@ def add_sensor():
     measured_values = data.get("values", {})  # 这里保证 measured_values 是字典
     print(f"Received sensor data: {sensor_id}, {sensor_type}, {location}, {measured_values}")
     sensor = ocean_service.add_sensor(sensor_id, sensor_type, location, measured_values)
+    end_time = time.time()
+    print(f"添加传感器执行时间: {end_time - start_time:.4f} 秒")
     return jsonify({"message": "Sensor added", "id": sensor.identity})
 
 @app.route('/get_nodes', methods=['GET'])
@@ -56,7 +60,10 @@ def get_substitutes(sensor_id):
 
 @app.route("/auto_replace/<sensor_id>", methods=["POST"])
 def auto_replace(sensor_id):
+    start_time = time.time()
     success, message, replacement_id= ocean_service.auto_replace_sensor(sensor_id)
+    end_time = time.time()
+    print(f"传感器自动替换执行时间: {end_time - start_time:.4f} 秒")
     return jsonify({
             'success': success,
             'message': message,
